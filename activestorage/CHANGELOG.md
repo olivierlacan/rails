@@ -1,3 +1,34 @@
+*   Add `with_all_variant_records` method to eager load all variant records on an attachment at once.
+    `with_attached_image` scope now eager loads variant records if using variant tracking.
+
+    *Alex Ghiculescu*
+
+*   Add metadata value for presence of audio channel in video blobs
+
+    The `metadata` attribute of video blobs has a new boolean key named `audio` that is set to
+    `true` if the file has an audio channel and `false` if it doesn't.
+
+    *Breno Gazzola*
+
+*   Adds analyzer for audio files.
+
+    *Breno Gazzola*
+
+*   Allow `expires_in` for ActiveStorage signed ids.
+
+    *aki77*
+
+*   Allow to purge an attachment when record is not persisted for `has_one_attached`
+
+    *Jacopo Beschi*
+
+*   Add a load hook called `active_storage_variant_record` (providing `ActiveStorage::VariantRecord`)
+    to allow for overriding aspects of the `ActiveStorage::VariantRecord` class. This makes
+    `ActiveStorage::VariantRecord` consistent with `ActiveStorage::Blob` and `ActiveStorage::Attachment`
+    that already have load hooks.
+
+    *Brendon Muir*
+
 *   `ActiveStorage::PreviewError` is raised when a previewer is unable to generate a preview image.
 
     *Alex Robbin*

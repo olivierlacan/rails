@@ -1,3 +1,20 @@
+*   Raise `ActiveSupport::EncryptedFile::MissingKeyError` when the
+    `RAILS_MASTER_KEY` environment variable is blank (e.g. `""`).
+
+    *Sunny Ripert*
+
+*   The `from:` option is added to `ActiveSupport::TestCase#assert_no_changes`.
+
+    It permits asserting on the initial value that is expected not to change.
+
+    ```ruby
+    assert_no_changes -> { Status.all_good? }, from: true do
+      post :create, params: { status: { ok: true } }
+    end
+    ```
+
+    *George Claghorn*
+
 *   Deprecate `ActiveSupport::SafeBuffer`'s incorrect implicit conversion of objects into string.
 
     Except for a few methods like `String#%`, objects must implement `#to_str`
@@ -27,7 +44,7 @@
 *   Added a faster and more compact `ActiveSupport::Cache` serialization format.
 
     It can be enabled with `config.active_support.cache_format_version = 7.0` or
-    `config.load_defaults(7.0)`. Regardless of the configuration Active Support
+    `config.load_defaults 7.0`. Regardless of the configuration Active Support
     7.0 can read cache entries serialized by Active Support 6.1 which allows to
     upgrade without invalidating the cache. However Rails 6.1 can't read the
     new format, so all readers must be upgraded before the new format is enabled.
@@ -73,9 +90,9 @@
     Ruby requires an initializer for non-numeric type as per examples below:
 
     ```ruby
-    %w[foo bar].sum('') 
+    %w[foo bar].sum('')
     # instead of %w[foo bar].sum
-    
+
     [[1, 2], [3, 4, 5]].sum([])
     #instead of [[1, 2], [3, 4, 5]].sum
     ```

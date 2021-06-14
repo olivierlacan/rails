@@ -1,3 +1,15 @@
+*   Add `ActiveModel::AttributeSet#values_for_database`
+
+    Returns attributes with values for assignment to the database.
+
+    *Chris Salzberg*
+
+*   Fix delegation in ActiveModel::Type::Registry#lookup and ActiveModel::Type.lookup
+
+    Passing a last positional argument `{}` would be incorrectly considered as keyword argument.
+
+    *Benoit Daloze*
+
 *   Cache and re-use generated attribute methods.
 
     Generated methods with identical implementations will now share their instruction sequences

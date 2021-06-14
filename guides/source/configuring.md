@@ -46,6 +46,10 @@ config.active_record.schema_format = :ruby
 
 Rails will use that particular setting to configure Active Record.
 
+WARNING: Use the public configuration methods over calling directly to the associated class. e.g. `Rails.application.config.action_mailer.options` instead of `ActionMailer::Base.options`.
+
+NOTE: If you need to apply configuration directly to a class, use a [lazy load hook](https://api.rubyonrails.org/classes/ActiveSupport/LazyLoadHooks.html) in an initializer to avoid auto-loading the class before initialization has completed. This will break because autoloading during initialization cannot be safely repeated when the app reloads.
+
 ### Rails General Configuration
 
 These configuration methods are to be called on a `Rails::Railtie` object, such as a subclass of `Rails::Engine` or `Rails::Application`.
@@ -412,7 +416,9 @@ in controllers and views. This defaults to `false`.
 
 * `config.active_record.record_timestamps` is a boolean value which controls whether or not timestamping of `create` and `update` operations on a model occur. The default value is `true`.
 
-* `config.active_record.partial_writes` is a boolean value and controls whether or not partial writes are used (i.e. whether updates only set attributes that are dirty). Note that when using partial writes, you should also use optimistic locking `config.active_record.lock_optimistically` since concurrent updates may write attributes based on a possibly stale read state. The default value is `true`.
+* `config.active_record.partial_inserts` is a boolean value and controls whether or not partial writes are used when creating new records (i.e. whether inserts only set attributes that are different from the default). The default value is `true`.
+
+* `config.active_record.partial_updates` is a boolean value and controls whether or not partial writes are used when updating existing records (i.e. whether updates only set attributes that are dirty). Note that when using partial updates, you should also use optimistic locking `config.active_record.lock_optimistically` since concurrent updates may write attributes based on a possibly stale read state. The default value is `true`.
 
 * `config.active_record.maintain_test_schema` is a boolean value which controls whether Active Record should try to keep your test database schema up-to-date with `db/schema.rb` (or `db/structure.sql`) when you run your tests. The default is `true`.
 
@@ -981,7 +987,7 @@ You can find more detailed configuration options in the
 
 * `config.active_storage.variant_processor` accepts a symbol `:mini_magick` or `:vips`, specifying whether variant transformations will be performed with MiniMagick or ruby-vips. The default is `:mini_magick`.
 
-* `config.active_storage.analyzers` accepts an array of classes indicating the analyzers available for Active Storage blobs. The default is `[ActiveStorage::Analyzer::ImageAnalyzer, ActiveStorage::Analyzer::VideoAnalyzer]`. The former can extract width and height of an image blob; the latter can extract width, height, duration, angle, and aspect ratio of a video blob.
+* `config.active_storage.analyzers` accepts an array of classes indicating the analyzers available for Active Storage blobs. The default is `[ActiveStorage::Analyzer::ImageAnalyzer, ActiveStorage::Analyzer::VideoAnalyzer, ActiveStorage::Analyzer::AudioAnalyzer]`. The image analyzer can extract width and height of an image blob; the video analyzer can extract width, height, duration, angle, aspect ratio and presence/absence of audio channel of a video blob; the audio analyzer can extract duration and bit rate of an audio blob.
 
 * `config.active_storage.previewers` accepts an array of classes indicating the image previewers available in Active Storage blobs. The default is `[ActiveStorage::Previewer::PopplerPDFPreviewer, ActiveStorage::Previewer::MuPDFPreviewer, ActiveStorage::Previewer::VideoPreviewer]`. `PopplerPDFPreviewer` and `MuPDFPreviewer` can generate a thumbnail from the first page of a PDF blob; `VideoPreviewer` from the relevant frame of a video blob.
 

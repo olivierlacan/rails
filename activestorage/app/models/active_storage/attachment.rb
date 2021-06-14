@@ -19,11 +19,13 @@ class ActiveStorage::Attachment < ActiveStorage::Record
   after_create_commit :mirror_blob_later, :analyze_blob_later
   after_destroy_commit :purge_dependent_blob_later
 
+  scope :with_all_variant_records, -> { includes(blob: :variant_records) }
+
   # Synchronously deletes the attachment and {purges the blob}[rdoc-ref:ActiveStorage::Blob#purge].
   def purge
     transaction do
       delete
-      record&.touch
+      record.touch if record&.persisted?
     end
     blob&.purge
   end
@@ -32,7 +34,7 @@ class ActiveStorage::Attachment < ActiveStorage::Record
   def purge_later
     transaction do
       delete
-      record&.touch
+      record.touch if record&.persisted?
     end
     blob&.purge_later
   end

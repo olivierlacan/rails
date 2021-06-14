@@ -341,7 +341,37 @@ class MigrationTest < ActiveRecord::TestCase
     end
   end
 
-  def test_add_column_with_if_not_exists_set_to_true_still_raises_if_type_is_different
+  def test_add_column_with_casted_type_if_not_exists_set_to_true
+    migration_a = Class.new(ActiveRecord::Migration::Current) {
+      def version; 100 end
+      def migrate(x)
+        type = current_adapter?(:PostgreSQLAdapter) ? :char : :blob
+        add_column "people", "last_name", type
+      end
+    }.new
+
+    migration_b = Class.new(ActiveRecord::Migration::Current) {
+      def version; 101 end
+      def migrate(x)
+        type = current_adapter?(:PostgreSQLAdapter) ? :char : :blob
+        add_column "people", "last_name", type, if_not_exists: true
+      end
+    }.new
+
+    ActiveRecord::Migrator.new(:up, [migration_a], @schema_migration, 100).migrate
+    assert_column Person, :last_name, "migration_a should have created the last_name column on people"
+
+    assert_nothing_raised do
+      ActiveRecord::Migrator.new(:up, [migration_b], @schema_migration, 101).migrate
+    end
+  ensure
+    Person.reset_column_information
+    if Person.column_names.include?("last_name")
+      Person.connection.remove_column("people", "last_name")
+    end
+  end
+
+  def test_add_column_with_if_not_exists_set_to_true_does_not_raise_if_type_is_different
     migration_a = Class.new(ActiveRecord::Migration::Current) {
       def version; 100 end
       def migrate(x)
@@ -359,7 +389,7 @@ class MigrationTest < ActiveRecord::TestCase
     ActiveRecord::Migrator.new(:up, [migration_a], @schema_migration, 100).migrate
     assert_column Person, :last_name, "migration_a should have created the last_name column on people"
 
-    assert_raises do
+    assert_nothing_raised do
       ActiveRecord::Migrator.new(:up, [migration_b], @schema_migration, 101).migrate
     end
   ensure
@@ -1366,13 +1396,13 @@ class CopyMigrationsTest < ActiveRecord::TestCase
   end
 
   def clear
-    ActiveRecord::Base.timestamped_migrations = true
+    ActiveRecord.timestamped_migrations = true
     to_delete = Dir[@migrations_path + "/*.rb"] - @existing_migrations
     File.delete(*to_delete)
   end
 
   def test_copying_migrations_without_timestamps
-    ActiveRecord::Base.timestamped_migrations = false
+    ActiveRecord.timestamped_migrations = false
     @migrations_path = MIGRATIONS_ROOT + "/valid"
     @existing_migrations = Dir[@migrations_path + "/*.rb"]
 
@@ -1393,7 +1423,7 @@ class CopyMigrationsTest < ActiveRecord::TestCase
   end
 
   def test_copying_migrations_without_timestamps_from_2_sources
-    ActiveRecord::Base.timestamped_migrations = false
+    ActiveRecord.timestamped_migrations = false
     @migrations_path = MIGRATIONS_ROOT + "/valid"
     @existing_migrations = Dir[@migrations_path + "/*.rb"]
 
@@ -1477,7 +1507,7 @@ class CopyMigrationsTest < ActiveRecord::TestCase
   end
 
   def test_copying_migrations_preserving_magic_comments
-    ActiveRecord::Base.timestamped_migrations = false
+    ActiveRecord.timestamped_migrations = false
     @migrations_path = MIGRATIONS_ROOT + "/valid"
     @existing_migrations = Dir[@migrations_path + "/*.rb"]
 
